@@ -18,8 +18,7 @@ last_steam = ""
 async def on_ready():
     print(f"{bot.user} 起動")
     news_loop.start()
-
-    news_loop.start()
+    
 
 @tasks.loop(minutes=1)
 async def news_loop():
