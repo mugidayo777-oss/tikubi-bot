@@ -9,8 +9,9 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 CHANNEL_ID = 1448878999907340290
 
 intents = discord.Intents.default()
-bot = commands.Bot(command_prefix="!", intents=intents)
+intents.message_content = True
 
+bot = commands.Bot(command_prefix="!", intents=intents)
 last_yahoo = ""
 last_steam = ""
 
@@ -63,5 +64,9 @@ async def news_loop():
 
             await channel.send(msg)
             last_steam = today
+
+@bot.command()
+async def test(ctx):
+    await ctx.send("✅ tikubi bot 動作OK")
 
 bot.run(TOKEN)
