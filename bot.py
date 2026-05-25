@@ -17,6 +17,10 @@ last_steam = ""
 @bot.event
 async def on_ready():
     print(f"{bot.user} 起動")
+
+    channel = bot.get_channel(CHANNEL_ID)
+    await channel.send("✅ tikubi bot 起動確認OK")
+
     news_loop.start()
 
 @tasks.loop(minutes=1)
