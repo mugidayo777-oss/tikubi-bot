@@ -16,6 +16,9 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 last_morning = ""
 last_evening = ""
 
+NEW_URL = "https://store.steampowered.com/feeds/newreleases.xml"
+SALE_URL = "https://store.steampowered.com/feeds/daily_deals.xml"
+
 @bot.event
 async def on_ready():
     print(f"{bot.user} 起動")
@@ -30,36 +33,32 @@ async def news_loop():
     now = datetime.now(ZoneInfo("Asia/Tokyo"))
     channel = await bot.fetch_channel(CHANNEL_ID)
 
-    # 朝7時 Steamニュース
+    # 朝7時 新作
     if now.hour == 7 and now.minute == 0:
         today = now.strftime("%Y-%m-%d")
 
         if today != last_morning:
-            feed = feedparser.parse(
-                "https://store.steampowered.com/feeds/news.xml"
-            )
+            feed = feedparser.parse(NEW_URL)
 
-            msg = "☀️ 朝のSteamニュース TOP3\n\n"
+            msg = "🆕 Steam新作 TOP3\n\n"
 
-            for i, news in enumerate(feed.entries[:3], 1):
-                msg += f"{i}. {news.title}\n{news.link}\n\n"
+            for i, game in enumerate(feed.entries[:3], 1):
+                msg += f"{i}. {game.title}\n{game.link}\n\n"
 
             await channel.send(msg)
             last_morning = today
 
-    # 夜7時 Steamニュース
+    # 夜7時 セール
     if now.hour == 19 and now.minute == 0:
         today = now.strftime("%Y-%m-%d")
 
         if today != last_evening:
-            feed = feedparser.parse(
-                "https://store.steampowered.com/feeds/news.xml"
-            )
+            feed = feedparser.parse(SALE_URL)
 
-            msg = "🌙 夜のSteamニュース TOP3\n\n"
+            msg = "💸 Steamセール TOP3\n\n"
 
-            for i, news in enumerate(feed.entries[:3], 1):
-                msg += f"{i}. {news.title}\n{news.link}\n\n"
+            for i, game in enumerate(feed.entries[:3], 1):
+                msg += f"{i}. {game.title}\n{game.link}\n\n"
 
             await channel.send(msg)
             last_evening = today
@@ -69,15 +68,24 @@ async def test(ctx):
     await ctx.send("✅ tikubi bot 動作OK")
 
 @bot.command()
-async def news(ctx):
-    feed = feedparser.parse(
-        "https://store.steampowered.com/feeds/news.xml"
-    )
+async def new(ctx):
+    feed = feedparser.parse(NEW_URL)
 
-    msg = "📰 Steamニュース TOP3\n\n"
+    msg = "🆕 Steam新作 TOP3\n\n"
 
-    for i, news in enumerate(feed.entries[:3], 1):
-        msg += f"{i}. {news.title}\n{news.link}\n\n"
+    for i, game in enumerate(feed.entries[:3], 1):
+        msg += f"{i}. {game.title}\n{game.link}\n\n"
+
+    await ctx.send(msg)
+
+@bot.command()
+async def sale(ctx):
+    feed = feedparser.parse(SALE_URL)
+
+    msg = "💸 Steamセール TOP3\n\n"
+
+    for i, game in enumerate(feed.entries[:3], 1):
+        msg += f"{i}. {game.title}\n{game.link}\n\n"
 
     await ctx.send(msg)
 
