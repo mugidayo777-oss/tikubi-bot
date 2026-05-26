@@ -68,4 +68,17 @@ async def news_loop():
 async def test(ctx):
     await ctx.send("✅ tikubi bot 動作OK")
 
+@bot.command()
+async def news(ctx):
+    feed = feedparser.parse(
+        "https://store.steampowered.com/feeds/news.xml"
+    )
+
+    msg = "📰 Steamニュース TOP3\n\n"
+
+    for i, news in enumerate(feed.entries[:3], 1):
+        msg += f"{i}. {news.title}\n{news.link}\n\n"
+
+    await ctx.send(msg)
+
 bot.run(TOKEN)
