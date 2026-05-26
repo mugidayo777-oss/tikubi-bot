@@ -12,58 +12,57 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
-last_yahoo = ""
-last_steam = ""
+
+last_morning = ""
+last_evening = ""
 
 @bot.event
 async def on_ready():
     print(f"{bot.user} 起動")
-    news_loop.start()
-    
+
+    if not news_loop.is_running():
+        news_loop.start()
 
 @tasks.loop(minutes=1)
 async def news_loop():
-    global last_yahoo, last_steam
+    global last_morning, last_evening
 
     now = datetime.now(ZoneInfo("Asia/Tokyo"))
-    channel = bot.get_channel(CHANNEL_ID)
+    channel = await bot.fetch_channel(CHANNEL_ID)
 
-    if channel is None:
-        return
-
-    # 朝7時 Yahooニュース
+    # 朝7時 Steamニュース
     if now.hour == 7 and now.minute == 0:
         today = now.strftime("%Y-%m-%d")
 
-        if today != last_yahoo:
+        if today != last_morning:
             feed = feedparser.parse(
-                "https://news.yahoo.co.jp/rss/topics/top-picks.xml"
+                "https://store.steampowered.com/feeds/news.xml"
             )
 
-            msg = "☀️ Yahooニュース TOP3\n\n"
+            msg = "☀️ 朝のSteamニュース TOP3\n\n"
 
             for i, news in enumerate(feed.entries[:3], 1):
                 msg += f"{i}. {news.title}\n{news.link}\n\n"
 
             await channel.send(msg)
-            last_yahoo = today
+            last_morning = today
 
     # 夜7時 Steamニュース
     if now.hour == 19 and now.minute == 0:
         today = now.strftime("%Y-%m-%d")
 
-        if today != last_steam:
+        if today != last_evening:
             feed = feedparser.parse(
                 "https://store.steampowered.com/feeds/news.xml"
             )
 
-            msg = "🌙 Steamニュース\n\n"
+            msg = "🌙 夜のSteamニュース TOP3\n\n"
 
             for i, news in enumerate(feed.entries[:3], 1):
                 msg += f"{i}. {news.title}\n{news.link}\n\n"
 
             await channel.send(msg)
-            last_steam = today
+            last_evening = today
 
 @bot.command()
 async def test(ctx):
